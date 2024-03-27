@@ -14,7 +14,8 @@ using System.IO;
 using System.Security.Cryptography;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NationalInstruments.VisaNS;
-
+using System.Configuration;
+using System.IO.Ports;
 
 delegate void delegatecall(string text); //Allows you to change text without a threading error well reading serial in
 
@@ -28,12 +29,23 @@ namespace SInclair_Loader
         string Reverse_file = "none";
         Boolean runSensor = false;
         Boolean runupdateSlabels = true;
+        bool Inst_found = false;
+        bool Com_found = false;
+        string read;
 
         uint[] Mac_current = new uint[6];
         uint[] Mac_new = new uint[6];
 
         int Serial = 0;
 
+        //LXI
+        List<string> Instruments = new List<string>();
+        int Instr_Num = 0;
+        MessageBasedSession RSA5000;
+        MessageBasedSession DSG815;
+        MessageBasedSession mbTest;
+
+        SerialPort serialPort1 = new SerialPort();
 
         public Form1()
         {
@@ -42,16 +54,30 @@ namespace SInclair_Loader
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string[] resources = ResourceManager.GetLocalManager().FindResources("?*");
-            foreach (string s in resources)
-            {
-                Debug.WriteLine(s);
-               // availableResourcesListBox.Items.Add(s);
-            }
+            Rsa_serial.Text = Properties.Settings.Default.RSA_Serial;
+            DSG_serial.Text = Properties.Settings.Default.Sig_Serial;
+            COM_PORT.Text = Properties.Settings.Default.PMS_Serial;
+
+            Debug.WriteLine("Dan");
+
+            //Serial Port
+            serialPort1.BaudRate = 115200;
+            serialPort1.DataBits = 8;
+            serialPort1.DiscardNull = false;
+            serialPort1.DtrEnable = false;
+            serialPort1.Parity = System.IO.Ports.Parity.None;
+            serialPort1.PortName = Properties.Settings.Default.PMS_Serial;
+            serialPort1.ReadBufferSize = 2048;
+            serialPort1.ReadTimeout = -1;
+            serialPort1.ReceivedBytesThreshold = 1;
+            serialPort1.RtsEnable = false;
+            serialPort1.StopBits = StopBits.One;
+            serialPort1.WriteBufferSize = 64;
+            serialPort1.WriteTimeout = -1;
+            serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived_1);
+
 
         }
-
-
 
         private void textchange(string text)
         {
@@ -65,12 +91,12 @@ namespace SInclair_Loader
             {
                 if (text.Length > 0)
                 {
-                    //textlinecount++;
-                    //if (textlinecount > 42)
-                    //{
-                    //    textBox1.Text = "";
-                    //    textlinecount = 0;
-                    //}
+                    textlinecount++;
+                    if (textlinecount > 42)
+                    {
+                        textBox1.Text = "";
+                        textlinecount = 0;
+                    }
                     textBox1.Text += text + Constants.vbCrLf;
                 }
                 else
@@ -506,7 +532,7 @@ namespace SInclair_Loader
                         this.textchange(info.Name + "   " + info.Length.ToString());
 
                         long F_lenght = info.Length;
-                        string F_Name ="/" + info.Name;
+                        string F_Name = "/" + info.Name;
                         byte F_N_lenght = (byte)F_Name.Length;
                         byte data = 0;
 
@@ -743,5 +769,250 @@ namespace SInclair_Loader
                 FIRM_PKG.BackColor = Color.LawnGreen;
             }
         }
+
+        private void FInd_instr_Click(object sender, EventArgs e)
+        {
+            bool Sig_found = false;
+            bool Spect_found = false;
+            Inst_found = false;
+
+            FInd_instr.BackColor = Color.Red;
+            this.textchange("Searching");
+            Debug.WriteLine("Starting");
+            Application.DoEvents();
+
+            string[] resources = ResourceManager.GetLocalManager().FindResources("?*");
+            foreach (string s in resources)
+            {
+                Instruments.Add(s);
+                Instr_Num++;
+            }
+
+            for (int i = 0; i < Instr_Num; i++)
+            {
+                String temp = "Int:" + i.ToString() + " " + Instruments[i];
+                //this.textchange(temp);
+                Boolean mbGood = true;
+
+                try
+                {
+                    mbTest = (MessageBasedSession)ResourceManager.GetLocalManager().Open(Instruments[i]);
+                }
+                catch (InvalidCastException)
+                {
+                    MessageBox.Show("Resource selected must be a message-based session");
+                    mbGood = false;
+                }
+                catch (Exception exp)
+                {
+                    //Debug.WriteLine(temp);
+                    // MessageBox.Show(exp.Message);
+                    temp += " Not Active";
+                    mbGood = false;
+                }
+
+
+                if (mbGood)
+                {
+                    if (Instruments[i].Contains("TCPIP") && !Instruments[i].Contains("SOCKET"))
+                    {
+                        Debug.WriteLine(temp);
+                        string textToWrite = ReplaceCommonEscapeSequences("*IDN?\n");
+                        string responseString = mbTest.Query(textToWrite);
+
+                        if (responseString.Contains(DSG_serial.Text))
+                        {
+                            temp += " SIgnal Gen Found! " + responseString;
+                            DSG815 = (MessageBasedSession)ResourceManager.GetLocalManager().Open(Instruments[i]);
+                            Sig_found = true;
+                        }
+                        else if (responseString.Contains(Rsa_serial.Text))
+                        {
+                            temp += " Spect An Found! " + responseString;
+                            RSA5000 = (MessageBasedSession)ResourceManager.GetLocalManager().Open(Instruments[i]);
+                            Spect_found = true;
+
+                        }
+                        else
+                        {
+                            temp += " " + responseString;
+                        }
+                    }
+                    else
+                    {
+                        temp += " Not Active";
+                        Debug.WriteLine(temp);
+                    }
+                    mbTest.Dispose();
+                }
+
+                this.textchange(temp);
+
+            }
+            if (Sig_found && Spect_found)
+            {
+                Inst_found = true;
+                FInd_instr.BackColor = Color.LawnGreen;
+                if (Com_found)
+                {
+                    Gain_tb.Enabled = true;
+                    Gain_tb.BackColor = Color.LawnGreen;
+                }
+            }
+            else
+            {
+                //FInd_instr.BackColor = Color.Red;
+            }
+        }
+
+        private string ReplaceCommonEscapeSequences(string s)
+        {
+            return s.Replace("\\n", "\n").Replace("\\r", "\r");
+        }
+
+        private string InsertCommonEscapeSequences(string s)
+        {
+            return s.Replace("\n", "\\n").Replace("\r", "\\r");
+        }
+
+        private void RSA_change_Click(object sender, EventArgs e)
+        {
+            string RSA_ser = Microsoft.VisualBasic.Interaction.InputBox("RSA5000 Serial Number Change", "RSA5000 Serial Number ?", "RSA");
+
+            Rsa_serial.Text = RSA_ser;
+
+            Properties.Settings.Default.RSA_Serial = RSA_ser;
+            Properties.Settings.Default.Save();
+
+        }
+
+        private void DSG_change_Click(object sender, EventArgs e)
+        {
+            string DSG_ser = Microsoft.VisualBasic.Interaction.InputBox("DSG815 Serial Number Change", "DSG815 Serial Number ?", "DSG");
+
+            DSG_serial.Text = DSG_ser;
+
+            Properties.Settings.Default.Sig_Serial = DSG_ser;
+            Properties.Settings.Default.Save();
+
+        }
+
+
+        private void COM_CHANGE_Click(object sender, EventArgs e)
+        {
+            string COM_ser = Microsoft.VisualBasic.Interaction.InputBox("PMS Serial Port Change", "COM PORT?", "COM3");
+
+            COM_PORT.Text = COM_ser;
+
+            Properties.Settings.Default.PMS_Serial = COM_ser;
+            Properties.Settings.Default.Save();
+
+            serialPort1.Close();
+            serialPort1.PortName = Properties.Settings.Default.PMS_Serial;
+
+            Serial_start.BackColor = Color.Gray;
+
+            Com_found = false;
+
+        }
+
+        private void Serial_start_Click(object sender, EventArgs e)
+        {
+            if (checkserial())
+            {
+                Serial_start.BackColor = Color.LawnGreen;
+                Com_found = true;
+
+                if (Inst_found)
+                {
+                    Gain_tb.Enabled = true;
+                    Gain_tb.BackColor = Color.LawnGreen;
+                }
+            }
+            else
+            {
+                Serial_start.BackColor = Color.Red;
+                Com_found = false;
+            }
+        }
+
+        private Boolean checkserial()
+        {
+            try
+            {
+                serialPort1.Open();
+                serialPort1.DiscardInBuffer();
+                serialPort1.DiscardOutBuffer();
+                if (serialPort1.IsOpen)
+                {
+                    this.textchange("Serial Port OK");
+                }
+                else
+                {
+                    this.textchange("Check Port / Cable & Name");
+                    return false;
+                }
+
+               // serialPort1.Close();
+                return true;
+            }
+
+            catch (IOException e)
+            {
+                this.textchange("Check Port / Cable & Name");
+                return false;
+                //  Console.WriteLine(e.Message);
+            }
+        }
+
+
+        private void serialPort1_DataReceived_1(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                do
+                {
+                    try
+                    {
+                        int left = serialPort1.BytesToRead;
+                        //Debug.WriteLine(left.ToString());
+                        read = serialPort1.ReadLine();
+                        read = read.Trim();
+
+                        //Debug.WriteLine(read);
+                        this.textchange(read);
+                    }
+                    catch (IOException)
+                    {
+                        return;
+                    }
+                } while (serialPort1.BytesToRead > 0);
+            }
+            catch (TimeoutException ex)
+            {
+                serialPort1.DiscardInBuffer();
+                serialPort1.DiscardOutBuffer();
+                MessageBox.Show(ex.ToString());
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
+        }
+
+        private void Gain_tb_Click(object sender, EventArgs e)
+        {
+            //Signal Gen
+
+
+        }
+
+        private void clear_txt_Click(object sender, EventArgs e)
+        {
+            this.textchange("");
+        }
+
+        //END
     }
 }

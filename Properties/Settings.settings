@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SInclair_Loader.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Sig_Serial" Type="System.String" Scope="User">
+      <Value Profile="(Default)">DSG8771</Value>
+    </Setting>
+    <Setting Name="RSA_Serial" Type="System.String" Scope="User">
+      <Value Profile="(Default)">RSA5000</Value>
+    </Setting>
+    <Setting Name="PMS_Serial" Type="System.String" Scope="User">
+      <Value Profile="(Default)">COM3</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
