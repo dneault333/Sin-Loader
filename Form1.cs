@@ -1004,7 +1004,7 @@ namespace SInclair_Loader
         private void Gain_tb_Click(object sender, EventArgs e)
         {
             //Signal Gen
-
+            //DSG
 
         }
 
