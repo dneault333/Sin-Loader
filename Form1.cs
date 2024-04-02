@@ -47,6 +47,33 @@ namespace SInclair_Loader
 
         SerialPort serialPort1 = new SerialPort();
 
+        //RF
+        double freq;
+        double pwr;
+        int Gain;
+        int Temp_Gain;
+        double dBm;
+        double Temp_freq;
+        double Temp_dBm;
+        double Set_freq = 100.00;
+        double RSA_ref = 15.00;
+        double Dsg_lvl = 15.00;
+        double Center_offset = 0;
+        double Upper_offset = 0;
+        double Lower_offset = 0;
+
+        //Serial checks
+        bool Coms_error = false;
+
+        bool check_port = false;
+        bool check_gain = false;
+        bool check_freq = false;
+        bool check_dBm = false;
+        int Check_state = 0;
+        int Timer_cnt = 0;
+
+
+
         public Form1()
         {
             InitializeComponent();
@@ -61,22 +88,43 @@ namespace SInclair_Loader
             Debug.WriteLine("Dan");
 
             //Serial Port
+            serialPort1.DtrEnable = false;
+            serialPort1.RtsEnable = false;
+            serialPort1.Handshake = Handshake.None;
             serialPort1.BaudRate = 115200;
             serialPort1.DataBits = 8;
             serialPort1.DiscardNull = false;
-            serialPort1.DtrEnable = false;
             serialPort1.Parity = System.IO.Ports.Parity.None;
             serialPort1.PortName = Properties.Settings.Default.PMS_Serial;
             serialPort1.ReadBufferSize = 2048;
             serialPort1.ReadTimeout = -1;
             serialPort1.ReceivedBytesThreshold = 1;
-            serialPort1.RtsEnable = false;
             serialPort1.StopBits = StopBits.One;
             serialPort1.WriteBufferSize = 64;
             serialPort1.WriteTimeout = -1;
             serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived_1);
+        }
 
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (mbTest != null) mbTest.Dispose();
+            if (DSG815 != null) DSG815.Dispose();
+            if (RSA5000 != null) RSA5000.Dispose();
+
+            serialPort1.Close();
+            serialPort1.Dispose();
+            textBox1.Dispose();
+            Application.Exit();
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+            //    MessageBox.Show("Close?");
+            serialPort1.Close();
+            serialPort1.Dispose();
+            Application.Exit();
         }
 
         private void textchange(string text)
@@ -168,29 +216,37 @@ namespace SInclair_Loader
         //Timer
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //
-            if (runSensor)
-            {
-                timer1.Enabled = false;
 
-                run_Sensor_Parse();
-                Sensor_make.Enabled = true;
-                runSensor = false;
+            string textToWrite = ReplaceCommonEscapeSequences(":CALCulate:MARKer1:X?\n");
+            string responseString = RSA5000.Query(textToWrite);
+            freq = 0;
+            double.TryParse(responseString, NumberStyles.Any, CultureInfo.InvariantCulture, out freq);
+            freq = freq / 1000000;
 
-                timer1.Enabled = true;
-            }
+            RSA_Freq_V.Text = freq.ToString(("F3"));
 
-            //
-            if (runupdateSlabels)
-            {
-                timer1.Enabled = false;
+            textToWrite = ReplaceCommonEscapeSequences(":CALCulate:MARKer1:Y?\n");
+            responseString = RSA5000.Query(textToWrite);
 
-                updateSlabels();
-                runupdateSlabels = false;
+            pwr = Convert.ToDouble(responseString);
+            RSA_pwr_V.Text = pwr.ToString(("F2"));
 
-                timer1.Enabled = true;
-            }
         }
+
+        private void Get_RF()
+        {
+            string textToWrite = ReplaceCommonEscapeSequences(":CALCulate:MARKer1:X?\n");
+            string responseString = RSA5000.Query(textToWrite);
+            freq = 0;
+            double.TryParse(responseString, NumberStyles.Any, CultureInfo.InvariantCulture, out freq);
+            freq = freq / 1000000;
+
+            textToWrite = ReplaceCommonEscapeSequences(":CALCulate:MARKer1:Y?\n");
+            responseString = RSA5000.Query(textToWrite);
+            pwr = Convert.ToDouble(responseString);
+
+        }
+
 
         private void Sensor_make_Click(object sender, EventArgs e)
         {
@@ -772,6 +828,8 @@ namespace SInclair_Loader
 
         private void FInd_instr_Click(object sender, EventArgs e)
         {
+            timer1.Enabled = false;
+
             bool Sig_found = false;
             bool Spect_found = false;
             Inst_found = false;
@@ -780,6 +838,10 @@ namespace SInclair_Loader
             this.textchange("Searching");
             Debug.WriteLine("Starting");
             Application.DoEvents();
+
+            if (mbTest != null) mbTest.Dispose();
+            if (DSG815 != null) DSG815.Dispose();
+            if (RSA5000 != null) RSA5000.Dispose();
 
             string[] resources = ResourceManager.GetLocalManager().FindResources("?*");
             foreach (string s in resources)
@@ -791,25 +853,25 @@ namespace SInclair_Loader
             for (int i = 0; i < Instr_Num; i++)
             {
                 String temp = "Int:" + i.ToString() + " " + Instruments[i];
-                //this.textchange(temp);
+                this.textchange(temp);
                 Boolean mbGood = true;
 
                 try
                 {
                     mbTest = (MessageBasedSession)ResourceManager.GetLocalManager().Open(Instruments[i]);
                 }
-                catch (InvalidCastException)
-                {
-                    MessageBox.Show("Resource selected must be a message-based session");
-                    mbGood = false;
-                }
                 catch (Exception exp)
                 {
-                    //Debug.WriteLine(temp);
-                    // MessageBox.Show(exp.Message);
+                    Debug.WriteLine(temp);
+                    Debug.WriteLine(exp.Message);
                     temp += " Not Active";
                     mbGood = false;
                 }
+                //catch (InvalidCastException)
+                //{
+                //    MessageBox.Show("Resource selected must be a message-based session");
+                //    mbGood = false;
+                //}
 
 
                 if (mbGood)
@@ -820,9 +882,11 @@ namespace SInclair_Loader
                         string textToWrite = ReplaceCommonEscapeSequences("*IDN?\n");
                         string responseString = mbTest.Query(textToWrite);
 
+                        mbTest.Dispose();
+
                         if (responseString.Contains(DSG_serial.Text))
                         {
-                            temp += " SIgnal Gen Found! " + responseString;
+                            temp += " Signal Gen Found! " + responseString;
                             DSG815 = (MessageBasedSession)ResourceManager.GetLocalManager().Open(Instruments[i]);
                             Sig_found = true;
                         }
@@ -842,8 +906,8 @@ namespace SInclair_Loader
                     {
                         temp += " Not Active";
                         Debug.WriteLine(temp);
+                        mbTest.Dispose();
                     }
-                    mbTest.Dispose();
                 }
 
                 this.textchange(temp);
@@ -856,7 +920,7 @@ namespace SInclair_Loader
                 if (Com_found)
                 {
                     Gain_tb.Enabled = true;
-                    Gain_tb.BackColor = Color.LawnGreen;
+                    Gain_tb.BackColor = Color.LightGray;
                 }
             }
             else
@@ -926,7 +990,7 @@ namespace SInclair_Loader
                 if (Inst_found)
                 {
                     Gain_tb.Enabled = true;
-                    Gain_tb.BackColor = Color.LawnGreen;
+                    Gain_tb.BackColor = Color.LightGray; ;
                 }
             }
             else
@@ -953,7 +1017,7 @@ namespace SInclair_Loader
                     return false;
                 }
 
-               // serialPort1.Close();
+                // serialPort1.Close();
                 return true;
             }
 
@@ -962,6 +1026,252 @@ namespace SInclair_Loader
                 this.textchange("Check Port / Cable & Name");
                 return false;
                 //  Console.WriteLine(e.Message);
+            }
+        }
+
+
+        private void Gain_tb_Click(object sender, EventArgs e)
+        {
+            timer1.Enabled = false;
+
+            string data;
+
+
+
+            Gain_tb.BackColor = Color.Red;
+
+            //Signal Gen
+
+            DSG815.Clear();
+            System.Threading.Thread.Sleep(100);
+            string textToWrite = ReplaceCommonEscapeSequences("*IDN?\n");
+            string responseString = DSG815.Query(textToWrite);
+
+            if (responseString.Length > 1)
+            {
+                DSG_Freq(Set_freq);
+                DSG_LVL(Dsg_lvl);
+                DSG_OUTP(true);
+            }
+            else
+            {
+                Gain_tb.BackColor = Color.Red;
+                FInd_instr.BackColor = Color.Red;
+                Gain_tb.Enabled = false;
+                return;
+            }
+
+            //RSA
+            RSA5000.Clear();
+            System.Threading.Thread.Sleep(100);
+            responseString = RSA5000.Query(textToWrite);
+
+            if (responseString.Length > 1)
+            {
+                RSA_Ref(RSA_ref);
+                RSA_Freq(Set_freq);
+            }
+            else
+            {
+                FInd_instr.BackColor = Color.Red;
+                Gain_tb.Enabled = false;
+                return;
+            }
+
+            //Coms
+            Coms_error = false;
+            serialPort1.Write("P1");
+            System.Threading.Thread.Sleep(50);
+            Check_state = 1;
+            check_port = true;
+            timer2.Enabled = true;
+
+
+            //timer1.Enabled = true;
+
+        }
+
+        //Timer
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if (Check_state == 0)
+            {
+                timer2.Enabled = false;
+                return;
+            }
+
+            if (Check_state == 1) // Port check
+            {
+                if (!check_port)
+                {
+                    Check_state = 2;
+                    Gain = 15;
+                    serialPort1.Write("G" + Gain.ToString());
+                    check_gain = true;
+                    System.Threading.Thread.Sleep(50);
+                    return;
+                }
+            }
+
+            if (Check_state == 2) // Gain check
+            {
+                if (!check_gain)
+                {
+                    if (Temp_Gain == Gain)
+                    {
+                        Check_state = 3;
+
+                        serialPort1.Write("F" + Set_freq.ToString());
+                        check_freq = true;
+                        System.Threading.Thread.Sleep(50);
+
+                    }
+                    else
+                    {
+                        Coms_error = true;
+                        Check_state = 50;
+                    }
+
+                    return;
+                }
+            }
+
+            if (Check_state == 3) // Freq check
+            {
+                if (!check_freq)
+                {
+                    if (Temp_freq == Set_freq)
+                    {
+                        Check_state = 4;
+                        Timer_cnt = 0;
+
+                        serialPort1.Write("S");
+                        check_dBm = true;
+                        System.Threading.Thread.Sleep(100);
+                    }
+                    else
+                    {
+                        Coms_error = true;
+                        Check_state = 50;
+                    }
+
+                    return;
+                }
+
+            }
+
+
+            if (Check_state == 4) // dBm check
+            {
+                if (!check_dBm)
+                {
+
+                    if (Temp_dBm < -0.01 || Temp_dBm > 0.01)
+                    {
+                        Check_state = 4;
+                        Timer_cnt = 0;
+
+                        Dsg_lvl = Dsg_lvl - Temp_dBm;
+                        DSG_LVL(Dsg_lvl);
+                        System.Threading.Thread.Sleep(250);
+
+                        serialPort1.Write("S");
+                        check_dBm = true;
+                        System.Threading.Thread.Sleep(100);
+
+                        Debug.WriteLine("Adjusting DSG " + Temp_dBm.ToString());
+                    }
+                    else
+                    {
+                        Check_state = 5;
+                        Timer_cnt = 0;
+                        Get_RF();
+
+                        Center_offset = pwr;
+                        this.textchange("Center Offset: " + Center_offset.ToString());
+                        System.Threading.Thread.Sleep(100);
+
+                        Dsg_lvl = Dsg_lvl + 5.00;
+                        DSG_LVL(Dsg_lvl);
+                        System.Threading.Thread.Sleep(250);
+
+                        serialPort1.Write("S");
+                        check_dBm = true;
+                        System.Threading.Thread.Sleep(100);
+                    }
+                    return;
+                }
+                else
+                {
+                    Timer_cnt++;
+                    if (Timer_cnt == 20)
+                    {
+                        Coms_error = true;
+                        Check_state = 50;
+                    }
+                }
+            }
+
+
+            if (Check_state == 5) // Upper check
+            {
+                if (!check_dBm)
+                {
+
+                    if (Temp_dBm < 4.9 || Temp_dBm > 5.1)
+                    {
+                        Check_state = 5;
+                        Timer_cnt = 0;
+                        double temp_adj = Temp_dBm - 5.00;
+
+                        Dsg_lvl = Dsg_lvl - temp_adj;
+                        DSG_LVL(Dsg_lvl);
+                        System.Threading.Thread.Sleep(200);
+
+                        Debug.WriteLine("Adjusting Upper DSG " + temp_adj.ToString());
+
+                        serialPort1.Write("S");
+                        check_dBm = true;
+                        System.Threading.Thread.Sleep(100);
+
+                    }
+                    else
+                    {
+                        Check_state = 50;
+                        Get_RF();
+
+                        Upper_offset = Temp_dBm;
+                        this.textchange("Upper Offset: " + Upper_offset.ToString());
+                    }
+                    return;
+                }
+                else
+                {
+                    Timer_cnt++;
+                    if (Timer_cnt == 20)
+                    {
+                        Coms_error = true;
+                        Check_state = 50;
+                    }
+                }
+            }
+
+
+            if (Check_state == 50) // Final check
+            {
+                if (Coms_error)
+                {
+                    Gain_tb.BackColor = Color.Red;
+                }
+                else
+                {
+                    Gain_tb.BackColor = Color.LawnGreen;
+                    Get_RF();
+                    RSA_Freq_V.Text = freq.ToString(("F3"));
+                    RSA_pwr_V.Text = pwr.ToString(("F2"));
+                }
+
+                Check_state = 0;
             }
         }
 
@@ -981,11 +1291,115 @@ namespace SInclair_Loader
 
                         //Debug.WriteLine(read);
                         this.textchange(read);
+
                     }
                     catch (IOException)
                     {
                         return;
                     }
+
+
+
+
+                    //Condition checks
+                    int pos;
+                    if (check_port)
+                    {
+                        if (read.Contains("Port:1"))
+                        {
+                            check_port = false;
+                        }
+                        else
+                        {
+                            Coms_error = true;
+                            check_port = false;
+                        }
+                    }
+
+
+                    if (check_gain)
+                    {
+                        if (read.Contains("Gain:"))
+                        {
+                            Temp_Gain = 0;
+                            check_gain = false;
+                            pos = read.IndexOf(":");
+                            read = read.Substring(pos + 1);
+
+
+                            if (int.TryParse(read, out Temp_Gain))
+                            {
+                                //
+                            }
+                            else
+                            {
+                                Coms_error = true;
+                            }
+                        }
+                        else
+                        {
+                            Coms_error = true;
+                            check_gain = false;
+                        }
+                    }
+
+
+                    if (check_freq)
+                    {
+                        if (read.Contains("Freq:"))
+                        {
+                            Temp_freq = 0;
+                            check_freq = false;
+                            pos = read.IndexOf(":");
+                            read = read.Substring(pos + 1);
+
+
+                            if (double.TryParse(read, out Temp_freq))
+                            {
+                                //
+                            }
+                            else
+                            {
+                                Coms_error = true;
+                            }
+                        }
+                        else
+                        {
+                            Coms_error = true;
+                            check_freq = false;
+                        }
+                    }
+
+
+                    if (check_dBm)
+                    {
+                        if (read.Contains("dBm :"))
+                        {
+                            Debug.WriteLine(read);
+
+                            Temp_dBm = 0;
+                            check_dBm = false;
+                            pos = read.IndexOf(":");
+                            read = read.Substring(pos + 1);
+
+
+                            if (double.TryParse(read, out Temp_dBm))
+                            {
+                                //
+                            }
+                            else
+                            {
+                                Coms_error = true;
+                            }
+                        }
+                        //else
+                        //{
+                        //    Coms_error = true;
+                        //    check_dBm = false;
+                        //}
+                    }
+
+
                 } while (serialPort1.BytesToRead > 0);
             }
             catch (TimeoutException ex)
@@ -1001,10 +1415,85 @@ namespace SInclair_Loader
             }
         }
 
-        private void Gain_tb_Click(object sender, EventArgs e)
+
+
+
+        private void DSG_Freq(double Freq)
         {
-            //Signal Gen
-            //DSG
+            string data = ":FREQ " + Freq.ToString() + "MHz" + "\n";
+            DSG815.Write(data);
+            System.Threading.Thread.Sleep(100);
+        }
+
+
+        private void DSG_LVL(double LVL)
+        {
+            string data = ":LEV " + LVL.ToString() + "\n";
+            DSG815.Write(data);
+            System.Threading.Thread.Sleep(100);
+        }
+
+        private void DSG_OUTP(bool ON)
+        {
+            string data;
+
+            if (ON)
+            {
+                data = ":OUTP " + "ON" + "\n";
+            }
+            else
+            {
+                data = ":OUTP " + "OFF" + "\n";
+            }
+
+            DSG815.Write(data);
+            System.Threading.Thread.Sleep(200);
+        }
+
+        private void RSA_Freq(double Freq)
+        {
+            Freq = Freq * 1000000;
+
+            string data = ":SENSe:FREQuency:CENTer " + Freq.ToString() + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
+
+            data = ":SENSe:FREQuency:SPAN 10000" + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
+
+            data = ":DISPlay:WINDow:TRACe:Y:SCALe:RLEVel 15" + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
+
+
+            data = ":CALCulate:MARKer1:STATe ON" + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
+
+
+            data = ":CALCulate:MARKer1:MAXimum:MAX" + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(300);
+
+            data = ":CALCulate:MARKer1:CPSearch[:STATe] 1" + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
+
+        }
+
+        private void RSA_Ref(double Ref)
+        {
+            string data = ":DISPlay:WINDow:TRACe:Y:SCALe:RLEVel " + Ref.ToString() + "\n";
+            data = ReplaceCommonEscapeSequences(data);
+            RSA5000.Write(data);
+            System.Threading.Thread.Sleep(100);
 
         }
 
@@ -1012,6 +1501,13 @@ namespace SInclair_Loader
         {
             this.textchange("");
         }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
 
         //END
     }

@@ -57,14 +57,19 @@ namespace SInclair_Loader
             this.Rsa_serial = new System.Windows.Forms.Label();
             this.RSA_change = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.DSG_serial = new System.Windows.Forms.Label();
-            this.DSG_change = new System.Windows.Forms.Button();
-            this.Serial_start = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
+            this.DSG_serial = new System.Windows.Forms.Label();
             this.COM_PORT = new System.Windows.Forms.Label();
+            this.DSG_change = new System.Windows.Forms.Button();
             this.COM_CHANGE = new System.Windows.Forms.Button();
-            this.Gain_tb = new System.Windows.Forms.Button();
+            this.Serial_start = new System.Windows.Forms.Button();
             this.clear_txt = new System.Windows.Forms.Button();
+            this.Gain_tb = new System.Windows.Forms.Button();
+            this.label13 = new System.Windows.Forms.Label();
+            this.RSA_pwr_V = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.RSA_Freq_V = new System.Windows.Forms.Label();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // textBox1
@@ -144,8 +149,7 @@ namespace SInclair_Loader
             // 
             // timer1
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 50;
+            this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Sensor_serial
@@ -313,7 +317,7 @@ namespace SInclair_Loader
             this.FInd_instr.BackColor = System.Drawing.Color.Gray;
             this.FInd_instr.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.FInd_instr.ForeColor = System.Drawing.Color.Black;
-            this.FInd_instr.Location = new System.Drawing.Point(12, 604);
+            this.FInd_instr.Location = new System.Drawing.Point(12, 512);
             this.FInd_instr.Name = "FInd_instr";
             this.FInd_instr.Size = new System.Drawing.Size(105, 59);
             this.FInd_instr.TabIndex = 14;
@@ -326,7 +330,7 @@ namespace SInclair_Loader
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label10.ForeColor = System.Drawing.Color.Gray;
-            this.label10.Location = new System.Drawing.Point(17, 513);
+            this.label10.Location = new System.Drawing.Point(169, 512);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(163, 22);
             this.label10.TabIndex = 15;
@@ -337,7 +341,7 @@ namespace SInclair_Loader
             this.Rsa_serial.AutoSize = true;
             this.Rsa_serial.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.Rsa_serial.ForeColor = System.Drawing.Color.Red;
-            this.Rsa_serial.Location = new System.Drawing.Point(186, 512);
+            this.Rsa_serial.Location = new System.Drawing.Point(338, 511);
             this.Rsa_serial.Name = "Rsa_serial";
             this.Rsa_serial.Size = new System.Drawing.Size(42, 23);
             this.Rsa_serial.TabIndex = 16;
@@ -348,7 +352,7 @@ namespace SInclair_Loader
             this.RSA_change.BackColor = System.Drawing.SystemColors.Control;
             this.RSA_change.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.RSA_change.ForeColor = System.Drawing.Color.Gray;
-            this.RSA_change.Location = new System.Drawing.Point(17, 538);
+            this.RSA_change.Location = new System.Drawing.Point(169, 537);
             this.RSA_change.Name = "RSA_change";
             this.RSA_change.Size = new System.Drawing.Size(85, 31);
             this.RSA_change.TabIndex = 17;
@@ -361,29 +365,51 @@ namespace SInclair_Loader
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label11.ForeColor = System.Drawing.Color.Gray;
-            this.label11.Location = new System.Drawing.Point(360, 513);
+            this.label11.Location = new System.Drawing.Point(518, 512);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(154, 22);
             this.label11.TabIndex = 18;
             this.label11.Text = "DSG815 Serial #";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label12.ForeColor = System.Drawing.Color.Gray;
+            this.label12.Location = new System.Drawing.Point(169, 602);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(162, 22);
+            this.label12.TabIndex = 18;
+            this.label12.Text = "PMS COM PORT:";
             // 
             // DSG_serial
             // 
             this.DSG_serial.AutoSize = true;
             this.DSG_serial.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.DSG_serial.ForeColor = System.Drawing.Color.Red;
-            this.DSG_serial.Location = new System.Drawing.Point(520, 512);
+            this.DSG_serial.Location = new System.Drawing.Point(678, 511);
             this.DSG_serial.Name = "DSG_serial";
             this.DSG_serial.Size = new System.Drawing.Size(43, 23);
             this.DSG_serial.TabIndex = 19;
             this.DSG_serial.Text = "DSG";
+            // 
+            // COM_PORT
+            // 
+            this.COM_PORT.AutoSize = true;
+            this.COM_PORT.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.COM_PORT.ForeColor = System.Drawing.Color.Red;
+            this.COM_PORT.Location = new System.Drawing.Point(337, 601);
+            this.COM_PORT.Name = "COM_PORT";
+            this.COM_PORT.Size = new System.Drawing.Size(55, 23);
+            this.COM_PORT.TabIndex = 19;
+            this.COM_PORT.Text = "COM3";
             // 
             // DSG_change
             // 
             this.DSG_change.BackColor = System.Drawing.SystemColors.Control;
             this.DSG_change.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.DSG_change.ForeColor = System.Drawing.Color.Gray;
-            this.DSG_change.Location = new System.Drawing.Point(360, 538);
+            this.DSG_change.Location = new System.Drawing.Point(518, 537);
             this.DSG_change.Name = "DSG_change";
             this.DSG_change.Size = new System.Drawing.Size(85, 31);
             this.DSG_change.TabIndex = 20;
@@ -391,47 +417,12 @@ namespace SInclair_Loader
             this.DSG_change.UseVisualStyleBackColor = false;
             this.DSG_change.Click += new System.EventHandler(this.DSG_change_Click);
             // 
-            // Serial_start
-            // 
-            this.Serial_start.BackColor = System.Drawing.Color.Gray;
-            this.Serial_start.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Serial_start.ForeColor = System.Drawing.Color.Black;
-            this.Serial_start.Location = new System.Drawing.Point(169, 604);
-            this.Serial_start.Name = "Serial_start";
-            this.Serial_start.Size = new System.Drawing.Size(105, 59);
-            this.Serial_start.TabIndex = 21;
-            this.Serial_start.Text = "Start Serial";
-            this.Serial_start.UseVisualStyleBackColor = false;
-            this.Serial_start.Click += new System.EventHandler(this.Serial_start_Click);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label12.ForeColor = System.Drawing.Color.Gray;
-            this.label12.Location = new System.Drawing.Point(352, 604);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(162, 22);
-            this.label12.TabIndex = 18;
-            this.label12.Text = "PMS COM PORT:";
-            // 
-            // COM_PORT
-            // 
-            this.COM_PORT.AutoSize = true;
-            this.COM_PORT.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.COM_PORT.ForeColor = System.Drawing.Color.Red;
-            this.COM_PORT.Location = new System.Drawing.Point(520, 603);
-            this.COM_PORT.Name = "COM_PORT";
-            this.COM_PORT.Size = new System.Drawing.Size(55, 23);
-            this.COM_PORT.TabIndex = 19;
-            this.COM_PORT.Text = "COM3";
-            // 
             // COM_CHANGE
             // 
             this.COM_CHANGE.BackColor = System.Drawing.SystemColors.Control;
             this.COM_CHANGE.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.COM_CHANGE.ForeColor = System.Drawing.Color.Gray;
-            this.COM_CHANGE.Location = new System.Drawing.Point(360, 632);
+            this.COM_CHANGE.Location = new System.Drawing.Point(169, 630);
             this.COM_CHANGE.Name = "COM_CHANGE";
             this.COM_CHANGE.Size = new System.Drawing.Size(85, 31);
             this.COM_CHANGE.TabIndex = 20;
@@ -439,19 +430,18 @@ namespace SInclair_Loader
             this.COM_CHANGE.UseVisualStyleBackColor = false;
             this.COM_CHANGE.Click += new System.EventHandler(this.COM_CHANGE_Click);
             // 
-            // Gain_tb
+            // Serial_start
             // 
-            this.Gain_tb.BackColor = System.Drawing.Color.Gray;
-            this.Gain_tb.Enabled = false;
-            this.Gain_tb.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Gain_tb.ForeColor = System.Drawing.Color.Black;
-            this.Gain_tb.Location = new System.Drawing.Point(12, 690);
-            this.Gain_tb.Name = "Gain_tb";
-            this.Gain_tb.Size = new System.Drawing.Size(105, 59);
-            this.Gain_tb.TabIndex = 22;
-            this.Gain_tb.Text = "Cal Gain ";
-            this.Gain_tb.UseVisualStyleBackColor = false;
-            this.Gain_tb.Click += new System.EventHandler(this.Gain_tb_Click);
+            this.Serial_start.BackColor = System.Drawing.Color.Gray;
+            this.Serial_start.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Serial_start.ForeColor = System.Drawing.Color.Black;
+            this.Serial_start.Location = new System.Drawing.Point(12, 602);
+            this.Serial_start.Name = "Serial_start";
+            this.Serial_start.Size = new System.Drawing.Size(105, 59);
+            this.Serial_start.TabIndex = 21;
+            this.Serial_start.Text = "Start Serial";
+            this.Serial_start.UseVisualStyleBackColor = false;
+            this.Serial_start.Click += new System.EventHandler(this.Serial_start_Click);
             // 
             // clear_txt
             // 
@@ -466,11 +456,79 @@ namespace SInclair_Loader
             this.clear_txt.UseVisualStyleBackColor = false;
             this.clear_txt.Click += new System.EventHandler(this.clear_txt_Click);
             // 
+            // Gain_tb
+            // 
+            this.Gain_tb.BackColor = System.Drawing.Color.Gray;
+            this.Gain_tb.Enabled = false;
+            this.Gain_tb.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Gain_tb.ForeColor = System.Drawing.Color.Black;
+            this.Gain_tb.Location = new System.Drawing.Point(12, 691);
+            this.Gain_tb.Name = "Gain_tb";
+            this.Gain_tb.Size = new System.Drawing.Size(105, 59);
+            this.Gain_tb.TabIndex = 22;
+            this.Gain_tb.Text = "Cal Gain ";
+            this.Gain_tb.UseVisualStyleBackColor = false;
+            this.Gain_tb.Click += new System.EventHandler(this.Gain_tb_Click);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label13.ForeColor = System.Drawing.Color.Gray;
+            this.label13.Location = new System.Drawing.Point(169, 691);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(163, 22);
+            this.label13.TabIndex = 24;
+            this.label13.Text = "RSA5000 Power: ";
+            this.label13.Click += new System.EventHandler(this.label13_Click);
+            // 
+            // RSA_pwr_V
+            // 
+            this.RSA_pwr_V.AutoSize = true;
+            this.RSA_pwr_V.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.RSA_pwr_V.ForeColor = System.Drawing.Color.Red;
+            this.RSA_pwr_V.Location = new System.Drawing.Point(323, 690);
+            this.RSA_pwr_V.Name = "RSA_pwr_V";
+            this.RSA_pwr_V.Size = new System.Drawing.Size(19, 23);
+            this.RSA_pwr_V.TabIndex = 25;
+            this.RSA_pwr_V.Text = "0";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label14.ForeColor = System.Drawing.Color.Gray;
+            this.label14.Location = new System.Drawing.Point(437, 691);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(149, 22);
+            this.label14.TabIndex = 26;
+            this.label14.Text = "RSA5000 Freq: ";
+            // 
+            // RSA_Freq_V
+            // 
+            this.RSA_Freq_V.AutoSize = true;
+            this.RSA_Freq_V.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.RSA_Freq_V.ForeColor = System.Drawing.Color.Red;
+            this.RSA_Freq_V.Location = new System.Drawing.Point(578, 692);
+            this.RSA_Freq_V.Name = "RSA_Freq_V";
+            this.RSA_Freq_V.Size = new System.Drawing.Size(19, 23);
+            this.RSA_Freq_V.TabIndex = 27;
+            this.RSA_Freq_V.Text = "0";
+            // 
+            // timer2
+            // 
+            this.timer2.Interval = 50;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1321, 866);
+            this.Controls.Add(this.RSA_Freq_V);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.RSA_pwr_V);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.clear_txt);
             this.Controls.Add(this.Gain_tb);
             this.Controls.Add(this.Serial_start);
@@ -545,14 +603,19 @@ namespace SInclair_Loader
         private System.Windows.Forms.Label Rsa_serial;
         private System.Windows.Forms.Button RSA_change;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label DSG_serial;
-        private System.Windows.Forms.Button DSG_change;
-        private System.Windows.Forms.Button Serial_start;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label DSG_serial;
         private System.Windows.Forms.Label COM_PORT;
+        private System.Windows.Forms.Button DSG_change;
         private System.Windows.Forms.Button COM_CHANGE;
-        private System.Windows.Forms.Button Gain_tb;
+        private System.Windows.Forms.Button Serial_start;
         private System.Windows.Forms.Button clear_txt;
+        private System.Windows.Forms.Button Gain_tb;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label RSA_pwr_V;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label RSA_Freq_V;
+        private System.Windows.Forms.Timer timer2;
     }
 }
 
