@@ -38,9 +38,7 @@ namespace SInclair_Loader
             this.F_select = new System.Windows.Forms.Button();
             this.R_select = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.Sensor_serial = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.Sensor_make = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -64,12 +62,18 @@ namespace SInclair_Loader
             this.COM_CHANGE = new System.Windows.Forms.Button();
             this.Serial_start = new System.Windows.Forms.Button();
             this.clear_txt = new System.Windows.Forms.Button();
-            this.Gain_tb = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.RSA_pwr_V = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.RSA_Freq_V = new System.Windows.Forms.Label();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
+            this.Sensor_serial = new System.Windows.Forms.TextBox();
+            this.Gain_tb = new System.Windows.Forms.Button();
+            this.timer3 = new System.Windows.Forms.Timer(this.components);
+            this.checkgain = new System.Windows.Forms.Button();
+            this.Sensor_make = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.Coup_Val = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -152,38 +156,16 @@ namespace SInclair_Loader
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // Sensor_serial
-            // 
-            this.Sensor_serial.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.Sensor_serial.Location = new System.Drawing.Point(169, 316);
-            this.Sensor_serial.Name = "Sensor_serial";
-            this.Sensor_serial.Size = new System.Drawing.Size(624, 29);
-            this.Sensor_serial.TabIndex = 1;
-            this.Sensor_serial.Text = "CC######";
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label3.ForeColor = System.Drawing.Color.Black;
-            this.label3.Location = new System.Drawing.Point(169, 291);
+            this.label3.Location = new System.Drawing.Point(169, 294);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(251, 22);
             this.label3.TabIndex = 2;
             this.label3.Text = "SENSOR SERIAL NUMBER";
-            // 
-            // Sensor_make
-            // 
-            this.Sensor_make.BackColor = System.Drawing.Color.LawnGreen;
-            this.Sensor_make.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Sensor_make.ForeColor = System.Drawing.Color.Black;
-            this.Sensor_make.Location = new System.Drawing.Point(12, 294);
-            this.Sensor_make.Name = "Sensor_make";
-            this.Sensor_make.Size = new System.Drawing.Size(121, 74);
-            this.Sensor_make.TabIndex = 4;
-            this.Sensor_make.Text = "MAKE\r\nSENSOR\r\nFILE";
-            this.Sensor_make.UseVisualStyleBackColor = false;
-            this.Sensor_make.Click += new System.EventHandler(this.Sensor_make_Click);
             // 
             // label4
             // 
@@ -456,20 +438,6 @@ namespace SInclair_Loader
             this.clear_txt.UseVisualStyleBackColor = false;
             this.clear_txt.Click += new System.EventHandler(this.clear_txt_Click);
             // 
-            // Gain_tb
-            // 
-            this.Gain_tb.BackColor = System.Drawing.Color.Gray;
-            this.Gain_tb.Enabled = false;
-            this.Gain_tb.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.Gain_tb.ForeColor = System.Drawing.Color.Black;
-            this.Gain_tb.Location = new System.Drawing.Point(12, 691);
-            this.Gain_tb.Name = "Gain_tb";
-            this.Gain_tb.Size = new System.Drawing.Size(105, 59);
-            this.Gain_tb.TabIndex = 22;
-            this.Gain_tb.Text = "Cal Gain ";
-            this.Gain_tb.UseVisualStyleBackColor = false;
-            this.Gain_tb.Click += new System.EventHandler(this.Gain_tb_Click);
-            // 
             // label13
             // 
             this.label13.AutoSize = true;
@@ -520,11 +488,89 @@ namespace SInclair_Loader
             this.timer2.Interval = 50;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
+            // Sensor_serial
+            // 
+            this.Sensor_serial.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Sensor_serial.Location = new System.Drawing.Point(169, 329);
+            this.Sensor_serial.Name = "Sensor_serial";
+            this.Sensor_serial.Size = new System.Drawing.Size(624, 29);
+            this.Sensor_serial.TabIndex = 1;
+            this.Sensor_serial.Text = "CC######";
+            // 
+            // Gain_tb
+            // 
+            this.Gain_tb.BackColor = System.Drawing.Color.Gray;
+            this.Gain_tb.Enabled = false;
+            this.Gain_tb.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Gain_tb.ForeColor = System.Drawing.Color.Black;
+            this.Gain_tb.Location = new System.Drawing.Point(10, 691);
+            this.Gain_tb.Name = "Gain_tb";
+            this.Gain_tb.Size = new System.Drawing.Size(105, 59);
+            this.Gain_tb.TabIndex = 22;
+            this.Gain_tb.Text = "Cal Gain ";
+            this.Gain_tb.UseVisualStyleBackColor = false;
+            this.Gain_tb.Click += new System.EventHandler(this.Gain_tb_Click);
+            // 
+            // timer3
+            // 
+            this.timer3.Interval = 50;
+            this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
+            // 
+            // checkgain
+            // 
+            this.checkgain.BackColor = System.Drawing.Color.Gray;
+            this.checkgain.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.checkgain.ForeColor = System.Drawing.Color.Black;
+            this.checkgain.Location = new System.Drawing.Point(10, 780);
+            this.checkgain.Name = "checkgain";
+            this.checkgain.Size = new System.Drawing.Size(105, 59);
+            this.checkgain.TabIndex = 28;
+            this.checkgain.Text = "Check Gain ";
+            this.checkgain.UseVisualStyleBackColor = false;
+            this.checkgain.Click += new System.EventHandler(this.checkgain_Click);
+            // 
+            // Sensor_make
+            // 
+            this.Sensor_make.BackColor = System.Drawing.Color.LawnGreen;
+            this.Sensor_make.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Sensor_make.ForeColor = System.Drawing.Color.Black;
+            this.Sensor_make.Location = new System.Drawing.Point(6, 294);
+            this.Sensor_make.Name = "Sensor_make";
+            this.Sensor_make.Size = new System.Drawing.Size(121, 74);
+            this.Sensor_make.TabIndex = 4;
+            this.Sensor_make.Text = "MAKE\r\nSENSOR\r\nFILE";
+            this.Sensor_make.UseVisualStyleBackColor = false;
+            this.Sensor_make.Click += new System.EventHandler(this.Sensor_make_Click);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label15.ForeColor = System.Drawing.Color.Black;
+            this.label15.Location = new System.Drawing.Point(636, 287);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(110, 22);
+            this.label15.TabIndex = 29;
+            this.label15.Text = "COUPLING";
+            // 
+            // Coup_Val
+            // 
+            this.Coup_Val.Font = new System.Drawing.Font("Arial", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Coup_Val.Location = new System.Drawing.Point(753, 284);
+            this.Coup_Val.Name = "Coup_Val";
+            this.Coup_Val.Size = new System.Drawing.Size(40, 29);
+            this.Coup_Val.TabIndex = 30;
+            this.Coup_Val.Text = "40";
+            this.Coup_Val.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1321, 866);
+            this.Controls.Add(this.Coup_Val);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.checkgain);
             this.Controls.Add(this.RSA_Freq_V);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.RSA_pwr_V);
@@ -584,9 +630,7 @@ namespace SInclair_Loader
         private System.Windows.Forms.Button F_select;
         private System.Windows.Forms.Button R_select;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox Sensor_serial;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button Sensor_make;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
@@ -610,12 +654,18 @@ namespace SInclair_Loader
         private System.Windows.Forms.Button COM_CHANGE;
         private System.Windows.Forms.Button Serial_start;
         private System.Windows.Forms.Button clear_txt;
-        private System.Windows.Forms.Button Gain_tb;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label RSA_pwr_V;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label RSA_Freq_V;
         private System.Windows.Forms.Timer timer2;
+        private System.Windows.Forms.TextBox Sensor_serial;
+        private System.Windows.Forms.Button Gain_tb;
+        private System.Windows.Forms.Timer timer3;
+        private System.Windows.Forms.Button checkgain;
+        private System.Windows.Forms.Button Sensor_make;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.TextBox Coup_Val;
     }
 }
 
